@@ -53,9 +53,10 @@ python report_gen.py
 | **목차** | 전체 목차 + AI 생성 비전 이미지 |
 | **01. 기관 소개** | `Institute_Info` 시트 기반 |
 | **02. 연구 연혁** | `Research_History` 시트 + 타임라인 인포그래픽 |
-| **03. 2025 핵심 연구 성과** | `Master_Research` 시트 (Pillar별 분류) |
-| **04. 주요 활동 및 외부 소통** | `Activities_&_News` 시트 |
-| **05. 2025년 주요 연구 상세** | `2025` 시트 (Pillar당 1페이지) |
+| **03. 주요 활동 및 외부 소통** | `Activities_&_News` 시트 |
+| **04. 2025년 주요 연구 상세** | `2025` 시트(Pillar 상세 서술) + `Master_Research`(연구 목록 표) 병합, Pillar당 1페이지 |
+| **05. 협력기관** | `Master_Research` 주요 발주처 기반, `partners/` 폴더의 기관 심볼 자동 삽입 |
+| **06. 발행물** | `Master_Research` 주요 성과물 기반, `[연구보고서]`·`[이슈리포트]`·`[논문]`·`[기타]` 분류 |
 
 ---
 
@@ -63,10 +64,11 @@ python report_gen.py
 
 - **엑셀 → Word 자동 변환**: 시트별 데이터를 섹션별로 자동 매핑
 - **타임라인 인포그래픽**: matplotlib으로 2015–2025 연구 흐름 시각화
-  - 3개 Pillar 레인 (시스템 전환, 지역 에너지 전환, 탈탄소 정책)
-  - 버블 크기 = 연도·분야별 연구 건수
+  - 3개 Pillar 레인, 버블 크기 = 연도·분야별 연구 건수
   - `연구 분야 ID` 기반 연구 연계/확장 관계 화살표 표시
-- **Pillar별 상세 페이지**: `2025` 시트의 각 Pillar 컬럼을 1페이지씩 구성
+- **Pillar별 상세 페이지**: `2025` 시트 서술 + `Master_Research` 연구 목록 표 결합
+- **협력기관 페이지**: `partners/` 폴더에 `기관명.png` 형식으로 로고 추가 시 자동 삽입
+- **발행물 페이지**: `[연구보고서]`, `[이슈리포트]`, `[논문]`, `[기타]` 접두어로 자동 분류
 - **연도 자동 확장**: 새 연도 시트(`2026` 등)를 추가하면 자동 반영 가능
 
 ---
@@ -75,15 +77,16 @@ python report_gen.py
 
 ```
 GesiFullReportGenerator
-├── add_title_page()               # 표지
-├── add_toc_page(image_path)       # 목차 (이미지 포함)
-├── add_institute_intro()          # 기관 소개
-├── add_research_history()         # 연구 연혁 + 인포그래픽
-│   └── _create_timeline_infographic()  # matplotlib 인포그래픽 생성
-├── add_key_research_2025()        # 핵심 연구 성과
-├── add_activities()               # 주요 활동
-├── add_2025_pillar_pages()        # Pillar별 상세 페이지
-└── save_report(filename)          # Word 저장
+├── add_title_page()                    # 표지
+├── add_toc_page(image_path)            # 목차 (이미지 포함)
+├── add_institute_intro()               # 01. 기관 소개
+├── add_research_history()              # 02. 연구 연혁 + 인포그래픽
+│   └── _create_timeline_infographic()  #     matplotlib 인포그래픽 생성
+├── add_activities()                    # 03. 주요 활동
+├── add_2025_pillar_pages()             # 04. 2025 상세 (Pillar 서술 + 연구 목록)
+├── add_partners_page(partners_dir)     # 05. 협력기관 (로고 이미지 자동 매핑)
+├── add_publications_page()             # 06. 발행물 (접두어 분류)
+└── save_report(filename)               # Word 저장
 ```
 
 ---
@@ -101,10 +104,23 @@ GesiFullReportGenerator
 
 ## 📝 커스터마이징
 
-새 연도 보고서를 만들려면:
+**새 연도 보고서 생성:**
 1. `Annual Report Database.xlsx`에 해당 연도 시트(`2026` 등) 추가
 2. `report_gen.py` 상단의 연도 문자열(`2025`) 수정
-3. `add_2025_pillar_pages()` 메서드의 시트명 수정
+
+**협력기관 로고 추가:**
+- `partners/` 폴더에 `기관명.png` 형식으로 이미지 저장
+- 파일명에 기관명이 포함되면 자동으로 매핑됨
+- 예: `환경부.png`, `TARA_logo.png`, `산업통상자원부.jpg`
+
+**발행물 등록 (엑셀 입력 형식):**
+```
+[연구보고서] 보고서 제목
+[이슈리포트] 이슈리포트 제목
+[논문] 논문 제목
+[기타] 기타 성과물
+```
+→ 한 셀에 여러 항목은 줄바꿈(Enter)으로 구분
 
 ---
 
